@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">キッチンタイマー</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_countdown_timer">CountdownTimerActivity</string>
+    <string name="label_start">スタート</string>
+    <string name="label_stop">ストップ</string>
+    <string name="label_settings">アラーム設定</string>
+    
+</resources>
