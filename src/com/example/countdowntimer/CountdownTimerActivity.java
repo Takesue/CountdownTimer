@@ -1,21 +1,28 @@
 package com.example.countdowntimer;
 
+import java.text.SimpleDateFormat;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
-import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 public class CountdownTimerActivity extends Activity {
 	
+	// TimerService側でcounter()メソッドを実行する必要があり、counterはクラスメソッドとなっている。
+	// クラスメソッド内で使用されている以下メンバクラスはクラス変数として定義する必要あり。
 	static TextView tv;
 	static SeekBar sb;
 	static Context mContext;
@@ -33,6 +40,7 @@ public class CountdownTimerActivity extends Activity {
 		CountdownTimerActivity.btnStop = (Button) this.findViewById(R.id.buttonStop);
 		CountdownTimerActivity.sb = (SeekBar)this.findViewById(R.id.seekBar1);
 		CountdownTimerActivity.sb.setBackgroundDrawable(this.drawScale());
+		this.setListneners();
 	}
 
 	private BitmapDrawable drawScale() {
@@ -68,9 +76,92 @@ public class CountdownTimerActivity extends Activity {
 		return bd;
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_countdown_timer, menu);
-		return true;
+	void setListneners() {
+		
+		CountdownTimerActivity.sb.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				CountdownTimerActivity.timeLeft = progress*60;
+				if (fromUser) {
+					CountdownTimerActivity.showTime(progress*60);
+				}
+				if(fromUser && (progress > 0)) {
+					CountdownTimerActivity.btnStart.setEnabled(true);
+				}
+				else {
+					CountdownTimerActivity.btnStart.setEnabled(false);
+				}
+				if (progress == 0) {
+					CountdownTimerActivity.btnStop.setEnabled(false);
+				}
+			}
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+			
+		});
+		
+		CountdownTimerActivity.btnStart.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(CountdownTimerActivity.mContext, TimerService.class);
+				intent.putExtra("counter", CountdownTimerActivity.timeLeft);
+				startService(intent);
+				CountdownTimerActivity.btnStart.setEnabled(false);
+				CountdownTimerActivity.btnStop.setEnabled(true);
+				CountdownTimerActivity.sb.setEnabled(false);
+			}
+		});
+		CountdownTimerActivity.btnStop.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(CountdownTimerActivity.mContext, TimerService.class);
+				CountdownTimerActivity.mContext.stopService(i);
+				CountdownTimerActivity.btnStop.setEnabled(false);
+				CountdownTimerActivity.btnStart.setEnabled(true);
+				CountdownTimerActivity.sb.setEnabled(true);
+			}
+		});
+		
+		((Button) this.findViewById(R.id.buttonSettings)).setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						Intent intent = new Intent(CountdownTimerActivity.this, Preferences.class);
+						startActivity(intent);
+					}
+		});
+
+	}
+
+	public static void showTime(int timeSeconds) {
+		SimpleDateFormat form = new SimpleDateFormat("mm:ss");
+		CountdownTimerActivity.tv.setText(form.format(timeSeconds*1000));
+	}
+	
+	public static void countdown(int counter) {
+		CountdownTimerActivity.showTime(counter);
+		CountdownTimerActivity.timeLeft = counter;
+		if (counter%60 == 0) {
+			CountdownTimerActivity.sb.setProgress(counter/60);
+		}
+		else {
+			CountdownTimerActivity.sb.setProgress(counter/60 + 1);
+		}
+		
+		if (counter != 0) {
+			CountdownTimerActivity.btnStop.setEnabled(true);
+			CountdownTimerActivity.btnStart.setEnabled(false);
+			CountdownTimerActivity.sb.setEnabled(false);
+		}
+		else {
+			CountdownTimerActivity.btnStop.setEnabled(false);
+			CountdownTimerActivity.btnStart.setEnabled(false);
+			CountdownTimerActivity.sb.setEnabled(true);
+		}
 	}
 }

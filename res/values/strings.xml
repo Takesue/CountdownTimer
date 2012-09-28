@@ -7,5 +7,11 @@
     <string name="label_start">スタート</string>
     <string name="label_stop">ストップ</string>
     <string name="label_settings">アラーム設定</string>
+    <string name="mesage_timeup">時間です</string>
+    <string name="label_ok">OK</string>
+    <string name="key_ringtone">alarm</string>
+    <string name="label_ringtone">アラーム音</string>
+    <string name="key_vibrator">vibrator</string>
+    <string name="label_vibrator">バイブレーター</string>
     
 </resources>
